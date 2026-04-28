@@ -1,0 +1,42 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: ts-backend/Dockerfile
+      # No build-args needed — the Dockerfile uses the base image's 'node' user (uid 1000)
+      # which matches the typical host user's uid.
+    container_name: forge-skill-swarm-backend
+    ports:
+      - "${PORT:-8000}:8000"
+    env_file:
+      # Single source of truth for all configuration + secrets.
+      # This file is NEVER copied into the image; it's injected at runtime.
+      - .env
+    environment:
+      # These are defaults/fallbacks. Any variable also present in .env
+      # will be overridden by .env (env_file takes precedence over environment).
+      - NODE_ENV=production
+      - DATA_DIR=/app/data
+      - DATABASE_PATH=/app/data/db/tasks.db
+      - WORKSPACE_ROOT=/app/data/tasks
+      - SKILLS_DIR=/app/skills
+      - CONFIG_DIR=/app/config
+      - PORT=8000
+      - HOST=0.0.0.0
+    volumes:
+      # Persist task workspaces and SQLite DB across restarts.
+      - ./data/tasks:/app/data/tasks
+      - ./data/db:/app/data/db
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 512M

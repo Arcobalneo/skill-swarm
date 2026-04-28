@@ -1,0 +1,53 @@
+{
+  "name": "forge-skill-swarm-backend",
+  "version": "1.0.0",
+  "description": "Pure TypeScript agent backend for skill execution with pi-agent-core",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "dev:start": "./scripts/dev.sh",
+    "dev:watch": "./scripts/dev.sh --watch",
+    "dev:stop": "bash -c 'PID_FILE=logs/dev-server.pid; if [ -f \"$PID_FILE\" ]; then kill $(cat \"$PID_FILE\") 2>/dev/null && echo \"Stopped\" || echo \"Already stopped\"; rm -f \"$PID_FILE\"; else echo \"No PID file found\"; fi'",
+    "dev:logs": "tail -f logs/dev-server.log",
+    "build": "tsc -p tsconfig.json && tsc-alias -p tsconfig.json",
+    "start": "node dist/index.js",
+    "lint": "eslint src/**/*.ts",
+    "format": "prettier --write src/**/*.ts",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.14.1",
+    "@mariozechner/pi-agent-core": "^0.70.5",
+    "@mariozechner/pi-ai": "^0.70.5",
+    "archiver": "^7.0.1",
+    "better-sqlite3": "^12.1.0",
+    "dotenv": "^17.4.2",
+    "hono": "^4.7.7"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/archiver": "^6.0.3",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^22.15.3",
+    "@typescript-eslint/eslint-plugin": "^8.31.1",
+    "@typescript-eslint/parser": "^8.31.1",
+    "eslint": "^9.25.1",
+    "eslint-config-prettier": "^10.1.2",
+    "globals": "^17.5.0",
+    "prettier": "^3.5.3",
+    "tsc-alias": "^1.8.15",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.2"
+  },
+  "keywords": [
+    "agent",
+    "skill",
+    "pi-agent",
+    "hono"
+  ],
+  "author": "",
+  "license": "ISC"
+}

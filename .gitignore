@@ -1,0 +1,47 @@
+# ============================================================
+# Forge Skill Swarm — Git Ignore
+# ============================================================
+
+# --- Environment & Secrets ---
+.env
+.env.*
+!.env.example
+
+# --- Runtime Data (NEVER commit) ---
+data/
+ts-backend/data/
+ts-backend/tasks/
+logs/
+*.zip
+
+# --- Skills & Config (runtime-only, see README for setup) ---
+# Place your own skills under skills/ and copy config/subagents.json.example
+# to config/subagents.json after cloning.
+skills/*
+!skills/.gitkeep
+config/*.json
+!config/*.example
+
+# --- Python ---
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+.venv
+.python-version
+
+# --- Node.js ---
+node_modules/
+ts-backend/node_modules/
+ts-backend/dist/
+*.log
+
+# --- IDE ---
+.vscode/
+.idea/
+
+# --- OS ---
+.DS_Store
+Thumbs.db

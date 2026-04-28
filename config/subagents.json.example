@@ -1,0 +1,23 @@
+{
+  "_schema": "forge-skill-swarm subagent configuration v1",
+  "subagents": {
+    "your-subagent-id": {
+      "id": "your-subagent-id",
+      "name": "Your Subagent Name",
+      "description": "Brief description of what this subagent does",
+      "skills": ["your-skill-name"],
+      "systemPromptModifier": "Optional system prompt modifier injected before the skill content.",
+      "workflowStages": [
+        { "id": "stage0", "name": "Stage Name", "required": true },
+        { "id": "stage1", "name": "Optional Stage", "required": false, "condition": "trigger condition" }
+      ],
+      "enforcementRules": [
+        "All artifacts must be written to outputs/ directory",
+        "Text content → outputs/*.md, Images → outputs/*.png"
+      ]
+    }
+  },
+  "skillToSubagent": {
+    "your-skill-name": "your-subagent-id"
+  }
+}
