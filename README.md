@@ -1,4 +1,4 @@
-# Forge Skill Swarm
+# Skill Swarm
 
 > A production-ready agent backend service. Submit a natural-language query, and the backend handles the rest: intent routing → skill scheduling → agent execution → artifact packaging → downloadable ZIP.
 
@@ -9,7 +9,7 @@
 
 ## What is this?
 
-Forge Skill Swarm is a backend service that turns natural-language requests into structured, downloadable artifacts through autonomous AI agents.
+Skill Swarm is a backend service that turns natural-language requests into structured, downloadable artifacts through autonomous AI agents.
 
 For the caller, the entire flow is three steps:
 
@@ -66,8 +66,8 @@ Receive query
 ### 1. Clone & Configure
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/forge-skill-swarm.git
-cd forge-skill-swarm
+git clone https://github.com/YOUR_USERNAME/skill-swarm.git
+cd skill-swarm
 
 # Copy environment template
 cp .env.example .env
@@ -197,7 +197,7 @@ All configuration lives in a single `.env` file at the project root.
 ## Project Structure
 
 ```
-forge-skill-swarm/
+skill-swarm/
 ├── .env                      # Runtime env vars (NOT in git)
 ├── .env.example              # Env template
 ├── docker-compose.yml        # Docker Compose config

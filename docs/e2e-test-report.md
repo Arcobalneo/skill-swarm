@@ -1,4 +1,4 @@
-# Forge Skill Swarm — 端到端测试报告
+# Skill Swarm — 端到端测试报告
 
 **测试时间**: 2026-04-28  
 **测试模型**: DeepSeek V4 Pro (reasoning=max)  

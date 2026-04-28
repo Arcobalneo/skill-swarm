@@ -30,7 +30,7 @@ async function bootstrap(): Promise<void> {
     hostname: HOST,
   });
 
-  logger.info('Forge Skill Swarm Backend running', {
+  logger.info('Skill Swarm Backend running', {
     url: `http://${HOST}:${PORT}`,
     dataDir: DATA_DIR,
     dbPath: DATABASE_PATH,

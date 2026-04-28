@@ -7,7 +7,7 @@ import { initDb, closeDb, createTask } from '@/services/db.js';
 import * as os from 'node:os';
 
 const TEST_TIMEOUT_MS = 600_000; // 10 min per test
-const DB_PATH = path.join(os.tmpdir(), `forge-regression-${Date.now()}.db`);
+const DB_PATH = path.join(os.tmpdir(), `skill-swarm-regression-${Date.now()}.db`);
 
 beforeAll(() => {
   initDb(DB_PATH);

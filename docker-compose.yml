@@ -5,7 +5,7 @@ services:
       dockerfile: ts-backend/Dockerfile
       # No build-args needed — the Dockerfile uses the base image's 'node' user (uid 1000)
       # which matches the typical host user's uid.
-    container_name: forge-skill-swarm-backend
+    container_name: skill-swarm-backend
     ports:
       - "${PORT:-8000}:8000"
     env_file:

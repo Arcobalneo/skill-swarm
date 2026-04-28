@@ -1,5 +1,5 @@
 {
-  "name": "forge-skill-swarm-backend",
+  "name": "skill-swarm",
   "version": "1.0.0",
   "description": "Pure TypeScript agent backend for skill execution with pi-agent-core",
   "type": "module",

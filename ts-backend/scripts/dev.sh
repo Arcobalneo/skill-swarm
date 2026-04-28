@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Dev server startup script for forge-skill-swarm backend
+# Dev server startup script for skill-swarm backend
 # Usage: ./scripts/dev.sh [--watch|-w] [--port PORT] [--no-health-check]
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -200,7 +200,7 @@ health_check() {
 # Main
 main() {
   echo "======================================"
-  echo "  Forge Skill Swarm - Dev Server"
+  echo "  Skill Swarm - Dev Server"
   echo "======================================"
   echo ""
 

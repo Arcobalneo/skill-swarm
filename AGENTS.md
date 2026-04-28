@@ -1,4 +1,4 @@
-# forge-skill-swarm
+# skill-swarm
 
 A pure TypeScript AI agent execution platform. It runs autonomous "skills" — structured agent workflows defined in Markdown — with a primary focus on replicating and generating Xiaohongshu (小红书) social-media notes.
 
@@ -23,7 +23,7 @@ Documentation and skill definitions are written primarily in **Chinese**.
 ## Project Structure
 
 ```
-forge-skill-swarm/
+skill-swarm/
 ├── AGENTS.md                   # This file
 ├── docs/
 │   └── mvp-design.md           # MVP product design (Chinese)

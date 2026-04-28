@@ -1,5 +1,5 @@
 {
-  "_schema": "forge-skill-swarm subagent configuration v1",
+  "_schema": "skill-swarm subagent configuration v1",
   "subagents": {
     "your-subagent-id": {
       "id": "your-subagent-id",

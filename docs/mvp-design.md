@@ -1,4 +1,4 @@
-# Forge Skill Swarm — MVP 设计文档
+# Skill Swarm — MVP 设计文档
 
 ## 1. 产品定位
 
