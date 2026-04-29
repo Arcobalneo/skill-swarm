@@ -48,20 +48,14 @@ async function runTest(config: TaskConfig): Promise<ExecutionState & { elapsedMs
 
 function reportResult(label: string, state: ExecutionState & { elapsedMs: number }) {
   const minutes = (state.elapsedMs / 1000 / 60).toFixed(1);
-  // eslint-disable-next-line no-console
   console.log(`\n[REGRESSION] ${label}`);
-  // eslint-disable-next-line no-console
   console.log(`  status: ${state.status}`);
-  // eslint-disable-next-line no-console
   console.log(`  elapsed: ${state.elapsedMs}ms (${minutes}min)`);
-  // eslint-disable-next-line no-console
   console.log(`  artifacts: ${state.artifacts?.join(', ') || 'none'}`);
   if (state.error) {
-    // eslint-disable-next-line no-console
     console.log(`  error: ${state.error}`);
   }
   if (state.message) {
-    // eslint-disable-next-line no-console
     console.log(`  message: ${state.message}`);
   }
 }
@@ -239,11 +233,8 @@ it(
     const allFiles = Array.isArray(files) ? files : [];
     const flatFiles = allFiles.map((f) => (typeof f === 'string' ? f : path.join(f as unknown as string, '')));
     const mdFiles = flatFiles.filter((f) => f.endsWith('.md'));
-    const txtFiles = flatFiles.filter((f) => f.endsWith('.txt'));
 
     expect(mdFiles.length).toBeGreaterThan(0);
-    // Prompt files are a bonus — if mmx/vision tools fail, txt files may not exist.
-    // We only assert that the core copywriting artifact exists.
   },
   TEST_TIMEOUT_MS,
 );

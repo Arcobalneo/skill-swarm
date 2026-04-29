@@ -42,7 +42,5 @@ export const routerModel = createModel(ROUTER_MODEL_CONFIG);
 export const visionModel = createModel(VISION_MODEL_CONFIG);
 
 export function getApiKey(provider: string): string | undefined {
-  if (provider === 'deepseek') return API_KEYS.deepseek;
-  if (provider === 'gemini') return API_KEYS.gemini;
-  return undefined;
+  return (API_KEYS as Record<string, string>)[provider] || undefined;
 }

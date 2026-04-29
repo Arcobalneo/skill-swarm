@@ -9,6 +9,7 @@ import { logger } from '@/lib/logger.js';
 import { createReadStream } from 'node:fs';
 import * as path from 'node:path';
 import type { Context } from 'hono';
+import { TaskStatus, type TaskStatusType } from '@/types/index.js';
 
 function getBaseUrl(c: Context): string {
   const host = c.req.header('host') || 'localhost:8000';
@@ -17,7 +18,7 @@ function getBaseUrl(c: Context): string {
 }
 
 function buildTaskReminder(
-  status: 'queued' | 'running' | 'completed' | 'failed' | 'interrupted',
+  status: TaskStatusType,
   baseUrl: string,
   taskId: string,
   artifactCount: number,
@@ -27,27 +28,27 @@ function buildTaskReminder(
   const eventsUrl = `${baseUrl}/api/v1/tasks/${taskId}/events`;
 
   switch (status) {
-    case 'queued':
+    case TaskStatus.Queued:
       return {
         reminder: `任务已排队，正在等待执行资源。`,
         next_step: `请轮询 GET ${statusUrl} 查询状态，当 status 变为 "completed" 后调用 GET ${artifactsUrl} 获取产物下载链接。`,
       };
-    case 'running':
+    case TaskStatus.Running:
       return {
         reminder: `任务正在执行中，典型耗时 1~4 分钟（复杂任务可能更长）。`,
         next_step: `请继续轮询 GET ${statusUrl} 查询状态，建议间隔 3~5 秒，避免频繁调用。也可 GET ${eventsUrl} 查看实时事件 trace。`,
       };
-    case 'completed':
+    case TaskStatus.Completed:
       return {
         reminder: `任务已完成，共产出 ${artifactCount} 个产物。`,
         next_step: `调用 GET ${artifactsUrl} 获取 ZIP 下载链接（30 分钟有效），或 GET ${eventsUrl} 查看执行事件 trace。`,
       };
-    case 'failed':
+    case TaskStatus.Failed:
       return {
         reminder: `任务执行失败，请查看 message 和 error 字段了解具体原因。`,
         next_step: `可检查 GET ${statusUrl} 获取完整状态，GET ${eventsUrl} 查看执行 trace，或查看服务端日志排查问题。`,
       };
-    case 'interrupted':
+    case TaskStatus.Interrupted:
       return {
         reminder: `任务在执行过程中被中断（服务器重启）。`,
         next_step: `请重新提交任务。可 GET ${eventsUrl} 查看中断前的执行 trace。`,
@@ -190,7 +191,7 @@ app.get('/api/v1/tasks/:task_id/artifacts', async (c) => {
   if (!state) {
     return c.json({ error: 'Task not found' }, 404);
   }
-  if (state.status !== 'completed' && state.status !== 'failed') {
+  if (state.status !== TaskStatus.Completed && state.status !== TaskStatus.Failed) {
     return c.json({ error: 'Task not finished yet', status: state.status }, 409);
   }
   const zipPath = await createZip(taskId);

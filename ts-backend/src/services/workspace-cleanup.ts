@@ -1,6 +1,7 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { logger } from '@/lib/logger.js';
+import { errMsg } from '@/lib/helpers.js';
 import { WORKSPACE_ROOT, WORKSPACE_CONFIG } from '@/config/index.js';
 import { deleteOldTasks, getOldestTasks } from '@/services/db.js';
 
@@ -33,7 +34,7 @@ export async function runCleanup(): Promise<{ deleted: number; ids: string[] }> 
     }
   } catch (err) {
     logger.warn('Failed to count workspace directories', {
-      error: err instanceof Error ? err.message : String(err),
+      error: errMsg(err),
     });
   }
 
@@ -57,7 +58,7 @@ async function deleteWorkspace(taskId: string): Promise<void> {
     logger.warn('Failed to delete workspace directory', {
       taskId,
       dir,
-      error: err instanceof Error ? err.message : String(err),
+      error: errMsg(err),
     });
   }
 }
@@ -70,7 +71,7 @@ export function scheduleCleanup(): void {
   setInterval(() => {
     runCleanup().catch((err) => {
       logger.error('Scheduled workspace cleanup failed', {
-        error: err instanceof Error ? err.message : String(err),
+        error: errMsg(err),
       });
     });
   }, interval);

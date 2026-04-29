@@ -68,7 +68,7 @@ export const EXECUTION_MODEL_CONFIG = envModel('EXECUTION', {
   reasoning: true,
   input: ['text'],
   contextWindow: 128000,
-  maxTokens: 16384,
+  maxTokens: 32768,
   thinkingFormat: 'deepseek',
 });
 
@@ -102,6 +102,8 @@ export const EXECUTION_CONFIG = {
   maxConcurrentTasks: Number(process.env.MAX_CONCURRENT_TASKS || 10),
   cleanupIntervalMs: Number(process.env.CLEANUP_INTERVAL_MS || 60_000),
   taskMaxAgeMs: Number(process.env.TASK_MAX_AGE_MS || 3_600_000),
+  writeFileMaxLines: Number(process.env.WRITE_FILE_MAX_LINES || 800),
+  writeFileMaxChars: Number(process.env.WRITE_FILE_MAX_CHARS || 32000),
 };
 
 // --- Workspace Cleanup ---

@@ -3,7 +3,17 @@ import * as path from 'node:path';
 import { SKILLS_DIR } from '@/config/index.js';
 import type { SkillInfo } from '@/types/index.js';
 
+// Cache skills list to avoid re-reading the filesystem on every call.
+// Invalidate after 30 seconds to pick up skill changes without restart.
+const SKILLS_CACHE_MAX_AGE_MS = 30_000;
+
+let skillsCache: { skills: SkillInfo[]; loadedAt: number } | null = null;
+
 export async function listSkills(): Promise<SkillInfo[]> {
+  if (skillsCache && Date.now() - skillsCache.loadedAt < SKILLS_CACHE_MAX_AGE_MS) {
+    return skillsCache.skills;
+  }
+
   const entries = await fs.readdir(SKILLS_DIR, { withFileTypes: true });
   const skills: SkillInfo[] = [];
   for (const entry of entries) {
@@ -23,7 +33,13 @@ export async function listSkills(): Promise<SkillInfo[]> {
       // skip directories without SKILL.md
     }
   }
+
+  skillsCache = { skills, loadedAt: Date.now() };
   return skills;
+}
+
+export function clearSkillsCache(): void {
+  skillsCache = null;
 }
 
 export function getSkillDir(name: string): string {
@@ -41,13 +57,12 @@ export async function loadSkill(name: string): Promise<{ info: SkillInfo; conten
 export async function loadMultipleSkills(
   names: string[],
 ): Promise<{ info: SkillInfo; content: string; dir: string }[]> {
-  const result: { info: SkillInfo; content: string; dir: string }[] = [];
-  for (const name of names) {
-    const { info, content } = await loadSkill(name);
-    const dir = path.dirname(info.path);
-    result.push({ info, content, dir });
-  }
-  return result;
+  const loaded = await Promise.all(names.map((name) => loadSkill(name)));
+  return loaded.map(({ info, content }) => ({
+    info,
+    content,
+    dir: path.dirname(info.path),
+  }));
 }
 
 /**

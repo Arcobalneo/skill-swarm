@@ -1,6 +1,7 @@
 import { serve } from '@hono/node-server';
 import app from '@/api/index.js';
 import { logger } from '@/lib/logger.js';
+import { errMsg } from '@/lib/helpers.js';
 import { HOST, PORT, DATA_DIR, DATABASE_PATH, WORKSPACE_ROOT } from '@/config/index.js';
 import { initDb } from '@/services/db.js';
 import { recoverTasks } from '@/services/task-manager.js';
@@ -39,6 +40,6 @@ async function bootstrap(): Promise<void> {
 }
 
 bootstrap().catch((err) => {
-  logger.error('Bootstrap failed', { error: err instanceof Error ? err.message : String(err) });
+  logger.error('Bootstrap failed', { error: errMsg(err) });
   process.exit(1);
 });

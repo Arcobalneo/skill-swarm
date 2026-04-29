@@ -1,5 +1,6 @@
 import { defineConfig } from 'vitest/config';
 import path from 'node:path';
+import 'dotenv/config';
 
 export default defineConfig({
   resolve: {
@@ -11,10 +12,8 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     env: {
-      // Use real API keys from environment for regression tests.
-      // Falls back to dummy values so unit tests that mock the router still pass.
-      DEEPSEEK_API_KEY: process.env.DEEPSEEK_API_KEY || 'test-deepseek-key',
-      GEMINI_API_KEY: process.env.GEMINI_API_KEY || 'test-gemini-key',
+      DEEPSEEK_API_KEY: process.env.DEEPSEEK_API_KEY || '',
+      GEMINI_API_KEY: process.env.GEMINI_API_KEY || '',
     },
     include: ['src/**/*.test.ts'],
     coverage: {

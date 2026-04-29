@@ -2,23 +2,9 @@ import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { CONFIG_DIR } from '@/config/index.js';
 import { logger } from '@/lib/logger.js';
+import type { SubagentConfig } from '@/types/index.js';
 
-export interface WorkflowStage {
-  id: string;
-  name: string;
-  required: boolean;
-  condition?: string;
-}
-
-export interface SubagentConfig {
-  id: string;
-  name: string;
-  description: string;
-  skills: string[];
-  systemPromptModifier: string;
-  workflowStages: WorkflowStage[];
-  enforcementRules: string[];
-}
+export type { SubagentConfig } from '@/types/index.js';
 
 export interface SubagentsRoot {
   subagents: Record<string, SubagentConfig>;

@@ -1,14 +1,13 @@
 import { runTask } from '@/services/executor.js';
-import type { ExecutionState, SkillSet, SubagentConfig } from '@/types/index.js';
+import { TaskStatus, type ExecutionState, type SkillSet, type TaskStatusType } from '@/types/index.js';
 import { logger } from '@/lib/logger.js';
+import { errMsg } from '@/lib/helpers.js';
 import { WORKSPACE_ROOT, EXECUTION_CONFIG, SKILLS_DIR } from '@/config/index.js';
-import { loadSubagentConfig, resolveSubagent } from '@/services/subagents.js';
+import { resolveSubagent } from '@/services/subagents.js';
 import {
   createTask,
   updateTaskStatus,
   getTask as getDbTask,
-  deleteTask,
-  getOldestTasks,
 } from '@/services/db.js';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
@@ -16,6 +15,39 @@ import { createWriteStream } from 'node:fs';
 
 const tasks = new Map<string, ExecutionState>();
 const runningTasks = new Set<string>();
+
+// Debounce timers for persistStatus to avoid writing on every agent event
+const persistTimers = new Map<string, ReturnType<typeof setTimeout>>();
+const PERSIST_DEBOUNCE_MS = 500;
+
+async function persistStatus(taskId: string, state: ExecutionState, immediate = false): Promise<void> {
+  const p = path.join(getWorkspaceDir(taskId), 'status.json');
+
+  if (immediate) {
+    // Cancel any pending debounce and write immediately
+    const existing = persistTimers.get(taskId);
+    if (existing) clearTimeout(existing);
+    persistTimers.delete(taskId);
+    await fs.writeFile(p, JSON.stringify(state, null, 2), 'utf-8');
+    return;
+  }
+
+  // Debounce: reset the timer, write after PERSIST_DEBOUNCE_MS of inactivity
+  const existing = persistTimers.get(taskId);
+  if (existing) clearTimeout(existing);
+
+  persistTimers.set(
+    taskId,
+    setTimeout(async () => {
+      persistTimers.delete(taskId);
+      try {
+        await fs.writeFile(p, JSON.stringify(state, null, 2), 'utf-8');
+      } catch {
+        // Ignore write failures during debounced persist
+      }
+    }, PERSIST_DEBOUNCE_MS),
+  );
+}
 
 export function getWorkspaceDir(taskId: string): string {
   return path.join(WORKSPACE_ROOT, taskId);
@@ -56,20 +88,20 @@ export async function enqueueTask(
       logger.warn('Failed to copy skill into workspace', {
         taskId,
         skill,
-        error: err instanceof Error ? err.message : String(err),
+        error: errMsg(err),
       });
     }
   }
 
   const initial: ExecutionState = {
-    status: 'queued',
+    status: TaskStatus.Queued,
     query,
     skillName,
     startTime: Date.now(),
     artifacts: [],
   };
   tasks.set(taskId, initial);
-  await persistStatus(taskId, initial);
+  await persistStatus(taskId, initial, true);
 
   // Write to SQLite
   createTask({
@@ -94,13 +126,13 @@ export async function enqueueTask(
     } catch (err) {
       const failed: ExecutionState = {
         ...initial,
-        status: 'failed',
-        error: err instanceof Error ? err.message : String(err),
-        message: `Unhandled error: ${err instanceof Error ? err.message : String(err)}`,
+        status: TaskStatus.Failed,
+        error: errMsg(err),
+        message: `Unhandled error: ${errMsg(err)}`,
         endTime: Date.now(),
       };
       tasks.set(taskId, failed);
-      await persistStatus(taskId, failed);
+      await persistStatus(taskId, failed, true);
       syncTaskToDb(taskId, failed);
       logger.error('Task failed', { taskId, error: failed.error });
     } finally {
@@ -144,18 +176,21 @@ export async function getStatus(taskId: string): Promise<ExecutionState | null> 
   }
 }
 
-async function persistStatus(taskId: string, state: ExecutionState): Promise<void> {
-  const p = path.join(getWorkspaceDir(taskId), 'status.json');
-  await fs.writeFile(p, JSON.stringify(state, null, 2), 'utf-8');
-}
+// Track the last status synced to DB to avoid redundant writes
+const lastSyncedStatus = new Map<string, TaskStatusType>();
 
 function syncTaskToDb(taskId: string, state: ExecutionState): void {
+  // Skip if status hasn't changed since last sync
+  const lastStatus = lastSyncedStatus.get(taskId);
+  if (lastStatus === state.status) return;
+  lastSyncedStatus.set(taskId, state.status);
+
   try {
     const fields: Record<string, string | number | null> = {};
-    if (state.status === 'running') {
+    if (state.status === TaskStatus.Running) {
       fields.started_at = state.startTime;
     }
-    if (state.status === 'completed' || state.status === 'failed') {
+    if (state.status === TaskStatus.Completed || state.status === TaskStatus.Failed) {
       fields.completed_at = state.endTime ?? Date.now();
       fields.error_message = state.error ?? null;
       fields.artifact_count = state.artifacts.length;
@@ -164,7 +199,7 @@ function syncTaskToDb(taskId: string, state: ExecutionState): void {
   } catch (err) {
     logger.warn('Failed to sync task status to DB', {
       taskId,
-      error: err instanceof Error ? err.message : String(err),
+      error: errMsg(err),
     });
   }
 }
@@ -216,11 +251,11 @@ export async function recoverTasks(): Promise<number> {
         const parsed = JSON.parse(raw) as ExecutionState;
 
         // If it was running when the server died, mark as interrupted
-        if (parsed.status === 'running') {
-          parsed.status = 'interrupted';
+        if (parsed.status === TaskStatus.Running) {
+          parsed.status = TaskStatus.Interrupted;
           parsed.error = 'Server restarted while task was running';
           parsed.endTime = Date.now();
-          await persistStatus(taskId, parsed);
+          await persistStatus(taskId, parsed, true);
         }
 
         tasks.set(taskId, parsed);
@@ -248,7 +283,7 @@ export async function recoverTasks(): Promise<number> {
     }
   } catch (err) {
     logger.warn('Failed to recover tasks', {
-      error: err instanceof Error ? err.message : String(err),
+      error: errMsg(err),
     });
   }
   return recovered;

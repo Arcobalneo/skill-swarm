@@ -1,3 +1,15 @@
+export const TaskStatus = {
+  Queued: 'queued',
+  Running: 'running',
+  Completed: 'completed',
+  Failed: 'failed',
+  Interrupted: 'interrupted',
+} as const;
+
+export type TaskStatusType = (typeof TaskStatus)[keyof typeof TaskStatus];
+
+export const TASK_STATUS_VALUES = Object.values(TaskStatus) as [string, ...string[]];
+
 export interface SkillInfo {
   name: string;
   description: string;
@@ -43,7 +55,7 @@ export interface WorkflowStage {
 }
 
 export interface ExecutionState {
-  status: 'queued' | 'running' | 'completed' | 'failed' | 'interrupted';
+  status: TaskStatusType;
   query: string;
   skillName: string;
   startTime: number;

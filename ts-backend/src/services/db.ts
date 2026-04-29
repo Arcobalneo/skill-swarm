@@ -1,5 +1,7 @@
 import Database from 'better-sqlite3';
 import { logger } from '@/lib/logger.js';
+import type { TaskStatusType } from '@/types/index.js';
+import { TASK_STATUS_VALUES } from '@/types/index.js';
 
 let db: Database.Database | null = null;
 
@@ -8,7 +10,7 @@ export interface DbTask {
   query: string;
   skill_name: string;
   subagent: string | null;
-  status: 'queued' | 'running' | 'completed' | 'failed' | 'interrupted';
+  status: TaskStatusType;
   created_at: number;
   started_at: number | null;
   completed_at: number | null;
@@ -54,7 +56,7 @@ export function initDb(dbPath: string): Database.Database {
       query TEXT NOT NULL,
       skill_name TEXT NOT NULL,
       subagent TEXT,
-      status TEXT NOT NULL CHECK(status IN ('queued','running','completed','failed','interrupted')),
+      status TEXT NOT NULL CHECK(status IN (${TASK_STATUS_VALUES.map((s) => `'${s}'`).join(',')})),
       created_at INTEGER NOT NULL,
       started_at INTEGER,
       completed_at INTEGER,
@@ -112,7 +114,7 @@ export function createTask(input: CreateTaskInput): void {
 
 export function updateTaskStatus(
   id: string,
-  status: DbTask['status'],
+  status: TaskStatusType,
   fields?: Partial<Omit<DbTask, 'id' | 'status'>>,
 ): void {
   const d = getDb();
